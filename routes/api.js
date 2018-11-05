@@ -4,7 +4,7 @@ var dao = require('../dao/dao');
 var util = require('../util/util')
 
 router.get('/getDictionary', function(req, res, next) {
-    dao.execute(new dao.selectList('select concat(table_name, \'-\', column_name) as category_name, column_name, value, name from t_dictionary where del_flag = false', [], function (error, results, fields) {
+    dao.execute(new dao.selectList('select concat(table_name, \'-\', column_name) as category_name, column_name, value, name, display_order from t_dictionary where del_flag = false', [], function (error, results, fields) {
         if (error) {
             return next(error)
         }
@@ -47,7 +47,7 @@ router.get('/getColumnInfo', function(req, res, next) {
 router.get('/getDataByType/:dataType', function(req, res, next) {
     var dataType = req.params.dataType
     var tableName = util.getTableName(dataType)
-    dao.execute(new dao.selectList('select * from ' + tableName + ' where del_flag = false', [], function (error, results, fields) {
+    dao.execute(new dao.selectList(`select * from ${tableName} where del_flag = false order by display_order`, [], function (error, results, fields) {
         if (error) {
             return next(error)
         }
@@ -56,8 +56,8 @@ router.get('/getDataByType/:dataType', function(req, res, next) {
 });
 
 router.get('/getData', function(req, res, next) {
-    dao.execute(new dao.selectList('select \'t_medical\' as table_name, m.* from t_medical m where del_flag = false ' +
-        'union all select \'t_healthy\' as table_name, h.* from t_healthy h where del_flag = false', [], function (error, results, fields) {
+    dao.execute(new dao.selectList('(select \'t_medical\' as table_name, m.* from t_medical m where del_flag = false order by display_order) ' +
+        'union all (select \'t_healthy\' as table_name, h.* from t_healthy h where del_flag = false order by display_order)', [], function (error, results, fields) {
         if (error) {
             return next(error)
         }
